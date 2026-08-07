@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Kenan Studio creates games, development tools, and digital assets. Discover 3D Collider for Unity and upcoming projects." />
+  <meta name="theme-color" content="#080d12" />
+  <meta property="og:title" content="Kenan Studio" />
+  <meta property="og:description" content="Games, tools and digital assets." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/kenan-banner.png" />
+  <title>Kenan Studio — Games, Tools & Digital Assets</title>
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="site-config.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <header class="site-header" id="top">
+    <div class="nav-shell">
+      <a class="brand" href="#top" aria-label="Kenan Studio home">
+        <img src="assets/images/kenan-studio-logo.webp" alt="Kenan Studio" />
+        <span>Kenan Studio</span>
+      </a>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#about">About</a>
+        <a href="#products">Products</a>
+        <a href="#collider">3D Collider</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-glow hero-glow-a"></div>
+      <div class="hero-glow hero-glow-b"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">Games · Tools · Digital Assets</span>
+          <h1 id="hero-title">Build better.<br><span>Create freely.</span></h1>
+          <p>Kenan Studio creates practical development tools, reusable digital assets, and original game projects with a focus on clear workflows and useful results.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#collider">Explore 3D Collider</a>
+            <a class="button button-secondary" href="#products">View projects</a>
+          </div>
+        </div>
+        <div class="hero-logo-wrap">
+          <img src="assets/images/kenan-studio-logo.webp" alt="Kenan Studio low-poly logo" class="hero-logo" />
+        </div>
+      </div>
+      <div class="banner-wrap">
+        <img src="assets/images/kenan-banner.webp" alt="Kenan Studio banner showing low-poly art and development tools" class="studio-banner" />
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section-heading">
+        <span class="eyebrow">About</span>
+        <h2>One studio, different kinds of projects.</h2>
+        <p>Kenan Studio is focused on creating useful, polished digital products for developers and players — from Unity editor extensions to 3D assets and games.</p>
+      </div>
+      <div class="pillars">
+        <article class="pillar">
+          <span class="pillar-icon">◇</span>
+          <h3>Development tools</h3>
+          <p>Focused utilities and editor extensions designed to simplify repetitive workflows.</p>
+        </article>
+        <article class="pillar">
+          <span class="pillar-icon">⬡</span>
+          <h3>3D & digital assets</h3>
+          <p>Reusable art and production assets built for practical integration into real projects.</p>
+        </article>
+        <article class="pillar">
+          <span class="pillar-icon">△</span>
+          <h3>Games</h3>
+          <p>Original game projects developed with the same emphasis on clarity, performance and strong visual identity.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section products-section" id="products">
+      <div class="section-heading">
+        <span class="eyebrow">Projects</span>
+        <h2>Current and upcoming work.</h2>
+      </div>
+      <div class="product-grid">
+        <article class="product-card product-card-featured">
+          <img src="assets/images/3d-collider-cover.webp" alt="3D Collider product artwork" />
+          <div class="product-card-body">
+            <div class="product-labels"><span>Unity Tool</span><span>Available soon</span></div>
+            <h3>3D Collider</h3>
+            <p>Generate surface-based Mesh Colliders that follow complex geometry, preserve holes and openings, and support Rigidbody workflows with convex colliders.</p>
+            <a class="text-link" href="#collider">See details →</a>
+          </div>
+        </article>
+        <article class="product-card future-card">
+          <div class="future-visual">3D</div>
+          <div class="product-card-body">
+            <div class="product-labels"><span>Editor Tool</span><span>In development</span></div>
+            <h3>3DEditor</h3>
+            <p>An in-Editor modeling workflow for creating and editing 3D geometry directly inside Unity.</p>
+          </div>
+        </article>
+        <article class="product-card future-card">
+          <div class="future-visual">+</div>
+          <div class="product-card-body">
+            <div class="product-labels"><span>Future releases</span></div>
+            <h3>More from Kenan Studio</h3>
+            <p>New tools, 3D assets and game projects will be added here as they are released.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section collider-section" id="collider">
+      <div class="section-heading collider-heading">
+        <div>
+          <span class="eyebrow">Unity · Physics Tool</span>
+          <h2>3D Collider</h2>
+          <p>Accurate collider generation for models where a simple solid collider is not enough.</p>
+        </div>
+        <a class="button button-primary store-link" data-store-link href="https://assetstore.unity.com/packages/slug/398482" target="_blank" rel="noopener">View on Unity Asset Store</a>
+      </div>
+
+      <div class="collider-feature">
+        <div class="collider-copy">
+          <h3>Preserve the spaces that matter.</h3>
+          <p>3D Collider detects surfaces and generates Mesh Colliders that can preserve tunnels, holes, windows, passages and concave spaces instead of filling an entire model with one simplified volume.</p>
+          <ul class="feature-list">
+            <li>Surface-based non-convex Mesh Colliders for static geometry</li>
+            <li>Closed convex Mesh Colliders for Rigidbody workflows</li>
+            <li>Support for complex, concave and open source meshes</li>
+            <li>Adjustable generation settings and Scene view visualization</li>
+            <li>Built-in, URP and HDRP compatible</li>
+            <li>No external package dependencies</li>
+          </ul>
+        </div>
+        <figure class="media-frame">
+          <img src="assets/images/3d-collider-planar.webp" alt="3D Collider planar surface mode preserving openings in complex geometry" loading="lazy" />
+        </figure>
+      </div>
+
+      <div class="gallery" aria-label="3D Collider screenshots">
+        <button class="gallery-item" data-lightbox="assets/images/3d-collider-overview.png" aria-label="Open 3D Collider overview image">
+          <img src="assets/images/3d-collider-overview.webp" alt="3D Collider overview" loading="lazy" />
+        </button>
+        <button class="gallery-item" data-lightbox="assets/images/3d-collider-unity.png" aria-label="Open 3D Collider Unity Editor screenshot">
+          <img src="assets/images/3d-collider-unity.webp" alt="3D Collider running in Unity Editor 2022" loading="lazy" />
+        </button>
+      </div>
+
+      <div class="specs">
+        <div><strong>Unity</strong><span>2022.3+</span></div>
+        <div><strong>Platforms tested</strong><span>macOS · Windows</span></div>
+        <div><strong>Render pipelines</strong><span>Built-in · URP · HDRP</span></div>
+        <div><strong>Source</strong><span>Full C# source included</span></div>
+      </div>
+    </section>
+
+    <section class="section contact-section" id="contact">
+      <div class="contact-panel">
+        <div>
+          <span class="eyebrow">Contact</span>
+          <h2>Support & business inquiries</h2>
+          <p>For product support, feedback, collaboration or other inquiries, contact Kenan Studio.</p>
+          <p class="contact-hint" id="contact-hint">Set your support email in <code>site-config.js</code> before publishing this site.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="button button-primary" id="email-link" href="#">Email Kenan Studio</a>
+          <a class="button button-secondary store-link" data-store-link href="https://assetstore.unity.com/packages/slug/398482" target="_blank" rel="noopener">Unity Asset Store</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="assets/images/kenan-studio-logo.webp" alt="" />
+        <div><strong>Kenan Studio</strong><span>Games, tools and digital assets.</span></div>
+      </div>
+      <p>© <span id="year"></span> Kenan Studio. All rights reserved.<br><span class="legal">Unity and related marks are trademarks of Unity Technologies. Kenan Studio is not affiliated with or endorsed by Unity Technologies.</span></p>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" aria-label="Close image">×</button>
+    <img id="lightbox-image" alt="Expanded product screenshot" />
+  </div>
+</body>
+</html>
