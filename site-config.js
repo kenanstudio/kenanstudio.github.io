@@ -4,6 +4,6 @@
   Example: contactEmail: "support@example.com"
 */
 window.KENAN_STUDIO_CONFIG = {
-  contactEmail: "",
+  contactEmail: "konan1517@gmail.com",
   assetStoreUrl: "https://assetstore.unity.com/packages/slug/398482"
 };
