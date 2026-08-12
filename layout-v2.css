@@ -1,0 +1,19 @@
+.brand-logo{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.12)}
+.brand-name{display:flex;flex-direction:column;line-height:1}
+.brand-name strong{text-transform:uppercase;letter-spacing:.16em}
+.brand-name small{text-transform:uppercase;color:var(--blue2);letter-spacing:.42em;margin-top:5px}
+.home-banner-section{padding:34px 0 0}
+.home-banner-wrap{width:min(1500px,calc(100% - 28px));margin:0 auto;border:1px solid rgba(255,255,255,.09);border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#0b1118,#101a24);box-shadow:var(--shadow);position:relative;min-height:280px;display:grid;place-items:center}
+.home-banner{width:100%;height:auto;display:block}
+.banner-placeholder-copy{display:none;text-align:center;padding:70px 20px}
+.banner-placeholder .banner-placeholder-copy{display:block}
+.banner-placeholder-copy h1{font-size:clamp(2.6rem,6vw,5.5rem);margin:0}
+.home-category-grid{margin-bottom:0}
+.category-link{text-decoration:none}
+.catalog-page-title{font-size:clamp(3.2rem,7vw,6.4rem);line-height:.94;margin-bottom:20px}
+.standalone-heading{max-width:900px}
+.standalone-contact{margin-top:25px}
+.product-gallery{grid-template-columns:1fr}
+.product-gallery .media-frame{max-width:1100px}
+.product-gallery .media-frame img{height:auto;object-fit:contain}
+@media(max-width:720px){.brand-name strong{letter-spacing:.08em}.brand-name small{letter-spacing:.2em}.home-banner-section{padding-top:18px}.home-banner-wrap{border-radius:15px;min-height:180px}.product-nav{gap:14px;flex-wrap:wrap}.product-nav a{font-size:.8rem}}
