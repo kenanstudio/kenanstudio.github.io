@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Kianan Studio creates Unity tools, 3D assets and games. Explore 3D Collider for Unity and upcoming projects." />
+  <meta name="description" content="Kianan Studio creates Unity tools, 3D assets and games." />
   <meta name="theme-color" content="#080d12" />
   <meta property="og:title" content="Kianan Studio" />
   <meta property="og:description" content="Unity tools, 3D assets and games." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="assets/images/3d-collider-cover.png" />
+  <meta property="og:image" content="assets/images/kianan-banner.webp" />
   <title>Kianan Studio — Unity Tools, 3D Assets & Games</title>
   <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
   <link rel="stylesheet" href="styles.css" />
@@ -18,44 +18,29 @@
 <body>
   <header class="site-header" id="top">
     <div class="nav-shell">
-      <a class="brand text-brand" href="#top" aria-label="Kianan Studio home">
-        <span class="brand-mark">K</span>
-        <span><strong>Kianan</strong><small>Studio</small></span>
+      <a class="brand" href="./" aria-label="Kianan Studio home">
+        <img class="brand-logo" src="assets/images/kianan-studio-logo.webp" alt="Kianan Studio" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'" />
+        <span class="brand-mark brand-fallback" style="display:none">K</span>
+        <span class="brand-name"><strong>Kianan</strong><small>Studio</small></span>
       </a>
       <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
       <nav class="nav-links" aria-label="Main navigation">
-        <a href="#categories" data-nav-category="unity-tools">Unity Tools</a>
-        <a href="#categories" data-nav-category="games">Games</a>
-        <a href="#categories" data-nav-category="3d-assets">3D Assets</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <a href="category.html?category=unity-tools">Unity Tools</a>
+        <a href="category.html?category=games">Games</a>
+        <a href="category.html?category=3d-assets">3D Assets</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-glow hero-glow-a"></div>
-      <div class="hero-glow hero-glow-b"></div>
-      <div class="hero-inner hero-simple">
-        <div class="hero-copy">
-          <span class="eyebrow">Tools · Assets · Games</span>
-          <h1>Kianan<br><span>Studio</span></h1>
-          <p>Unity tools for creating, 3D assets for building, and original games for playing.</p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="#categories">Explore projects</a>
-            <a class="button button-secondary" href="product.html?id=3d-collider">3D Collider</a>
-          </div>
-        </div>
-        <div class="hero-product-showcase">
-          <a href="product.html?id=3d-collider" class="hero-product-image" aria-label="Open 3D Collider details">
-            <img src="assets/images/3d-collider-overview.webp" alt="3D Collider in Unity Editor" />
-          </a>
-          <div class="hero-product-caption">
-            <span class="eyebrow">Featured Unity Tool</span>
-            <strong>3D Collider</strong>
-            <span>Collider generation for complex meshes.</span>
-          </div>
+    <section class="home-banner-section">
+      <div class="home-banner-wrap">
+        <img class="home-banner" src="assets/images/kianan-banner.webp" alt="Kianan Studio — tools, 3D assets and games" onerror="this.style.display='none';this.parentElement.classList.add('banner-placeholder')" />
+        <div class="banner-placeholder-copy">
+          <span class="eyebrow">Kianan Studio</span>
+          <h1>Tools · Assets · Games</h1>
         </div>
       </div>
     </section>
@@ -64,132 +49,35 @@
       <div class="section-heading">
         <span class="eyebrow">Browse</span>
         <h2>Choose a category.</h2>
-        <p>Select a category to see its tools, games or assets. Open any item for a dedicated page with details, media and links.</p>
+        <p>Open a category to view its tools, games or 3D assets.</p>
       </div>
-
-      <div class="category-grid" id="category-grid" aria-live="polite">
-        <button class="category-card active" data-category="unity-tools">
+      <div class="category-grid home-category-grid">
+        <a class="category-card category-link" href="category.html?category=unity-tools">
           <span class="category-icon">◇</span>
-          <span><strong>Unity Tools</strong><small>Tools and editor extensions for faster Unity workflows.</small></span>
-          <em>2</em>
-        </button>
-        <button class="category-card" data-category="games">
-          <span class="category-icon">🎮</span>
-          <span><strong>Games</strong><small>Original games and interactive projects from Kianan Studio.</small></span>
-          <em>0</em>
-        </button>
-        <button class="category-card" data-category="3d-assets">
-          <span class="category-icon">⬡</span>
-          <span><strong>3D Assets</strong><small>Reusable 3D assets and content for game development.</small></span>
-          <em>0</em>
-        </button>
-      </div>
-
-      <div class="catalog-shell" id="catalog-shell">
-        <aside class="catalog-sidebar" id="catalog-sidebar">
-          <button class="sidebar-link active" data-sidebar-category="unity-tools"><span>Unity Tools</span><em>2</em></button>
-          <button class="sidebar-link" data-sidebar-category="games"><span>Games</span><em>0</em></button>
-          <button class="sidebar-link" data-sidebar-category="3d-assets"><span>3D Assets</span><em>0</em></button>
-        </aside>
-        <section class="catalog-list-wrap">
-          <div class="catalog-list-head">
-            <div>
-              <span class="eyebrow">Catalog</span>
-              <h3 id="catalog-title">Unity Tools</h3>
-            </div>
-          </div>
-          <div class="catalog-list" id="catalog-list">
-            <a class="catalog-item catalog-item-featured" href="product.html?id=3d-collider">
-              <div class="catalog-thumb"><img src="assets/images/3d-collider-cover.webp" alt="3D Collider product artwork" /></div>
-              <div class="catalog-item-copy">
-                <div class="catalog-meta"><span>Unity Asset Store</span><span>v1.0.0</span></div>
-                <h4>3D Collider</h4>
-                <p>Generate practical colliders for complex 3D meshes directly inside the Unity Editor. Supports surface-based MeshColliders and oriented compound BoxColliders for Rigidbody workflows.</p>
-              </div>
-              <span class="catalog-arrow">→</span>
-            </a>
-            <a class="catalog-item" href="product.html?id=3deditor">
-              <div class="catalog-thumb"><div class="item-placeholder">3D</div></div>
-              <div class="catalog-item-copy">
-                <div class="catalog-meta"><span>In development</span></div>
-                <h4>3DEditor</h4>
-                <p>Create and edit 3D geometry directly inside Unity.</p>
-              </div>
-              <span class="catalog-arrow">→</span>
-            </a>
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <section class="section featured-tool-section" id="featured-3d-collider">
-      <div class="section-heading">
-        <span class="eyebrow">Featured Unity Tool</span>
-        <h2>3D Collider</h2>
-        <p>A Unity Editor tool for generating colliders from complex meshes while preserving important spaces such as openings, holes, tunnels and passages.</p>
-      </div>
-      <div class="featured-tool-grid">
-        <a class="featured-tool-main-image" href="product.html?id=3d-collider">
-          <img src="assets/images/3d-collider-planar.webp" alt="3D Collider surface-based collider generation preserving openings" />
+          <span><strong>Unity Tools</strong><small>Editor tools and extensions for Unity workflows.</small></span>
+          <span class="catalog-arrow">→</span>
         </a>
-        <div class="featured-tool-copy">
-          <h3>Two workflows for different physics needs.</h3>
-          <ul class="feature-list">
-            <li>Surface-based MeshCollider generation for static geometry</li>
-            <li>Preserves openings, holes, tunnels and passages</li>
-            <li>Oriented compound BoxCollider generation for Rigidbody objects</li>
-            <li>Adjustable Accuracy with real-time Editor preview</li>
-            <li>Closed-mesh validation for Convex generation</li>
-            <li>Built-in, URP and HDRP compatible</li>
-          </ul>
-          <div class="hero-actions">
-            <a class="button button-primary" href="product.html?id=3d-collider">View full details</a>
-            <a class="button button-secondary store-link" data-store-link href="https://assetstore.unity.com/packages/slug/398482" target="_blank" rel="noopener">Unity Asset Store</a>
-          </div>
-        </div>
-      </div>
-      <div class="mini-gallery">
-        <img src="assets/images/3d-collider-overview.webp" alt="3D Collider overview" loading="lazy" />
-        <img src="assets/images/3d-collider-unity.webp" alt="3D Collider Unity Editor screenshot" loading="lazy" />
-      </div>
-    </section>
-
-    <section class="section" id="about">
-      <div class="section-heading">
-        <span class="eyebrow">About</span>
-        <h2>One studio. Different kinds of projects.</h2>
-        <p>Kianan Studio develops practical Unity tools, reusable 3D assets and original games with a focus on clear workflows and useful results.</p>
-      </div>
-      <div class="pillars">
-        <article class="pillar"><span class="pillar-icon">◇</span><h3>Unity Tools</h3><p>Editor extensions and focused utilities for real production workflows.</p></article>
-        <article class="pillar"><span class="pillar-icon">⬡</span><h3>3D Assets</h3><p>Reusable models and content prepared for game development.</p></article>
-        <article class="pillar"><span class="pillar-icon">△</span><h3>Games</h3><p>Original interactive projects developed under the Kianan Studio brand.</p></article>
-      </div>
-    </section>
-
-    <section class="section contact-section" id="contact">
-      <div class="contact-panel">
-        <div>
-          <span class="eyebrow">Contact</span>
-          <h2>Support & business inquiries</h2>
-          <p>For product support, feedback, collaboration or other inquiries, contact Kianan Studio.</p>
-          <p class="contact-hint" id="contact-hint">Public support email will be updated after the new branded mailbox is created.</p>
-        </div>
-        <div class="contact-actions">
-          <a class="button button-primary" id="email-link" href="#">Email Kianan Studio</a>
-          <a class="button button-secondary store-link" data-store-link href="https://assetstore.unity.com/packages/slug/398482" target="_blank" rel="noopener">Unity Asset Store</a>
-        </div>
+        <a class="category-card category-link" href="category.html?category=games">
+          <span class="category-icon">🎮</span>
+          <span><strong>Games</strong><small>Original games and interactive projects.</small></span>
+          <span class="catalog-arrow">→</span>
+        </a>
+        <a class="category-card category-link" href="category.html?category=3d-assets">
+          <span class="category-icon">⬡</span>
+          <span><strong>3D Assets</strong><small>Reusable 3D content for game development.</small></span>
+          <span class="catalog-arrow">→</span>
+        </a>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="footer-inner">
-      <div class="footer-brand text-brand">
-        <span class="brand-mark">K</span>
-        <div><strong>Kianan Studio</strong><span>Unity tools, 3D assets and games.</span></div>
+      <div class="footer-brand">
+        <strong>Kianan Studio</strong>
+        <span>Unity tools, 3D assets and games.</span>
       </div>
-      <p>© <span id="year"></span> Kianan Studio. All rights reserved.<br><span class="legal">Unity and related marks are trademarks of Unity Technologies. Kianan Studio is not affiliated with or endorsed by Unity Technologies.</span></p>
+      <p>© <span id="year"></span> Kianan Studio. All rights reserved.</p>
     </div>
   </footer>
 </body>
