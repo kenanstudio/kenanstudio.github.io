@@ -1,5 +1,11 @@
 (() => {
   const cfg = window.KIANAN_STUDIO_CONFIG || {};
+
+  const extraStyles = document.createElement('link');
+  extraStyles.rel = 'stylesheet';
+  extraStyles.href = 'home-enhancements.css';
+  document.head.appendChild(extraStyles);
+
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
@@ -46,6 +52,7 @@
   }[id] || '◆');
 
   function renderCategories() {
+    if (!catalog || !categoryGrid) return;
     categoryGrid.innerHTML = catalog.categories.map(cat => {
       const count = catalog.products.filter(p => p.category === cat.id).length;
       return `<button class="category-card ${cat.id === activeCategory ? 'active' : ''}" data-category="${cat.id}">
@@ -64,6 +71,7 @@
   }
 
   function renderCatalog() {
+    if (!catalog || !sidebar || !list) return;
     const cat = catalog.categories.find(c => c.id === activeCategory);
     const products = catalog.products.filter(p => p.category === activeCategory);
     if (title) title.textContent = cat?.title || 'Projects';
@@ -90,7 +98,8 @@
       const visual = product.cover
         ? `<img src="${product.cover}" alt="${product.title}" loading="lazy">`
         : `<div class="item-placeholder">${product.title.slice(0,2).toUpperCase()}</div>`;
-      return `<a class="catalog-item" href="product.html?id=${encodeURIComponent(product.id)}">
+      const extraClass = product.id === '3d-collider' ? ' catalog-item-featured' : '';
+      return `<a class="catalog-item${extraClass}" href="product.html?id=${encodeURIComponent(product.id)}">
         <div class="catalog-thumb">${visual}</div>
         <div class="catalog-item-copy">
           <div class="catalog-meta"><span>${product.status || ''}</span>${product.version ? `<span>v${product.version}</span>` : ''}</div>
@@ -101,6 +110,14 @@
       </a>`;
     }).join('');
   }
+
+  document.querySelectorAll('[data-nav-category]').forEach(link => link.addEventListener('click', () => {
+    activeCategory = link.dataset.navCategory;
+    if (catalog) {
+      renderCategories();
+      renderCatalog();
+    }
+  }));
 
   if (categoryGrid && sidebar && list) {
     fetch('data/products.json', { cache: 'no-store' })
@@ -115,7 +132,7 @@
       })
       .catch(err => {
         console.error(err);
-        categoryGrid.innerHTML = '<p class="load-error">Catalog is temporarily unavailable.</p>';
+        // Keep the static Unity Tools / 3D Collider fallback already present in index.html.
       });
   }
 })();
