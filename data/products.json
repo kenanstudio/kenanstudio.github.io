@@ -24,17 +24,15 @@
       "status": "Unity Asset Store",
       "version": "1.0.0",
       "shortDescription": "Generate practical colliders for complex 3D meshes directly inside the Unity Editor.",
-      "description": "3D Collider is a Unity Editor tool for generating colliders from complex meshes. In non-convex mode it creates surface-based MeshCollider geometry that can preserve openings, holes, tunnels and passages. In Convex mode it generates an oriented compound collider from BoxColliders for use with Rigidbody objects, with adjustable accuracy and real-time preview.",
+      "description": "3D Collider is a Unity Editor tool for generating colliders from complex meshes. In non-convex mode it creates surface-based MeshCollider geometry that can preserve openings, holes, tunnels and passages. In Convex mode it creates closed convex MeshColliders generated from the model surface for Rigidbody workflows.",
       "cover": "assets/images/3d-collider-cover.webp",
       "gallery": [
-        "assets/images/3d-collider-planar.webp",
-        "assets/images/3d-collider-overview.webp",
         "assets/images/3d-collider-unity.webp"
       ],
       "features": [
         "Surface-based MeshCollider generation for static geometry",
         "Preserves important openings, holes, tunnels and passages",
-        "Oriented compound BoxCollider generation for dynamic Rigidbody objects",
+        "Closed convex MeshColliders generated from the model surface for Rigidbody workflows",
         "Adjustable Accuracy with real-time Editor preview",
         "Closed-mesh validation for Convex generation",
         "Built-in, URP and HDRP compatible",
