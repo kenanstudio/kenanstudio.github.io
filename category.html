@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#080d12" />
+  <title>Kianan Studio — Catalog</title>
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="category.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="./" aria-label="Kianan Studio home">
+        <img class="brand-logo" src="assets/images/kianan-studio-logo.webp" alt="Kianan Studio" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'" />
+        <span class="brand-mark brand-fallback" style="display:none">K</span>
+        <span class="brand-name"><strong>Kianan</strong><small>Studio</small></span>
+      </a>
+      <nav class="nav-links product-nav">
+        <a href="category.html?category=unity-tools">Unity Tools</a>
+        <a href="category.html?category=games">Games</a>
+        <a href="category.html?category=3d-assets">3D Assets</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+  <main class="product-page">
+    <div class="product-page-shell">
+      <a class="back-link" href="./">← Home</a>
+      <div class="section-heading">
+        <span class="eyebrow">Browse</span>
+        <h1 class="catalog-page-title" id="category-title">Catalog</h1>
+        <p id="category-description"></p>
+      </div>
+      <div class="catalog-list" id="category-list"><p class="load-error">Loading…</p></div>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><div class="footer-brand"><strong>Kianan Studio</strong><span>Unity tools, 3D assets and games.</span></div><p>© <span id="year"></span> Kianan Studio. All rights reserved.</p></div></footer>
+</body>
+</html>
