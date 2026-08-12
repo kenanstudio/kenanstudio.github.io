@@ -7,17 +7,25 @@
   <title>Kianan Studio — Product</title>
   <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="layout-v2.css" />
   <script defer src="site-config.js"></script>
   <script defer src="product.js"></script>
 </head>
 <body>
   <header class="site-header">
     <div class="nav-shell">
-      <a class="brand text-brand" href="./" aria-label="Kianan Studio home">
-        <span class="brand-mark">K</span>
-        <span><strong>Kianan</strong><small>Studio</small></span>
+      <a class="brand" href="./" aria-label="Kianan Studio home">
+        <img class="brand-logo" src="assets/images/kianan-studio-logo.webp" alt="Kianan Studio" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'" />
+        <span class="brand-mark brand-fallback" style="display:none">K</span>
+        <span class="brand-name"><strong>Kianan</strong><small>Studio</small></span>
       </a>
-      <nav class="nav-links product-nav"><a href="./#categories">All projects</a><a href="./#contact">Contact</a></nav>
+      <nav class="nav-links product-nav">
+        <a href="category.html?category=unity-tools">Unity Tools</a>
+        <a href="category.html?category=games">Games</a>
+        <a href="category.html?category=3d-assets">3D Assets</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
     </div>
   </header>
   <main class="product-page">
@@ -27,7 +35,7 @@
   </main>
   <footer class="site-footer">
     <div class="footer-inner">
-      <div class="footer-brand text-brand"><span class="brand-mark">K</span><div><strong>Kianan Studio</strong><span>Unity tools, 3D assets and games.</span></div></div>
+      <div class="footer-brand"><strong>Kianan Studio</strong><span>Unity tools, 3D assets and games.</span></div>
       <p>© <span id="year"></span> Kianan Studio. All rights reserved.</p>
     </div>
   </footer>
