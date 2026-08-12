@@ -21,10 +21,10 @@
       "id": "3d-collider",
       "category": "unity-tools",
       "title": "3D Collider",
-      "status": "Available soon",
+      "status": "Unity Asset Store",
       "version": "1.0.0",
-      "shortDescription": "Generate colliders for complex meshes directly inside Unity.",
-      "description": "3D Collider generates surface-based Mesh Colliders for static geometry and compound collider solutions for Rigidbody workflows, helping preserve holes, tunnels, passages and other important spaces in complex models.",
+      "shortDescription": "Generate practical colliders for complex 3D meshes directly inside the Unity Editor.",
+      "description": "3D Collider is a Unity Editor tool for generating colliders from complex meshes. In non-convex mode it creates surface-based MeshCollider geometry that can preserve openings, holes, tunnels and passages. In Convex mode it generates an oriented compound collider from BoxColliders for use with Rigidbody objects, with adjustable accuracy and real-time preview.",
       "cover": "assets/images/3d-collider-cover.webp",
       "gallery": [
         "assets/images/3d-collider-planar.webp",
@@ -32,12 +32,20 @@
         "assets/images/3d-collider-unity.webp"
       ],
       "features": [
-        "Surface-based non-convex Mesh Colliders for static geometry",
-        "Closed convex collider workflow for Rigidbody objects",
-        "Support for complex, concave and open source meshes",
-        "Adjustable generation settings and Scene view visualization",
+        "Surface-based MeshCollider generation for static geometry",
+        "Preserves important openings, holes, tunnels and passages",
+        "Oriented compound BoxCollider generation for dynamic Rigidbody objects",
+        "Adjustable Accuracy with real-time Editor preview",
+        "Closed-mesh validation for Convex generation",
         "Built-in, URP and HDRP compatible",
+        "Tested on macOS and Windows",
         "No external package dependencies"
+      ],
+      "specs": [
+        ["Unity", "2022.3+"],
+        ["Platforms tested", "macOS · Windows"],
+        ["Render pipelines", "Built-in · URP · HDRP"],
+        ["Source", "Full C# source included"]
       ],
       "links": {
         "primaryLabel": "View on Unity Asset Store",
