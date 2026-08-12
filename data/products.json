@@ -1,0 +1,61 @@
+{
+  "categories": [
+    {
+      "id": "unity-tools",
+      "title": "Unity Tools",
+      "description": "Tools and editor extensions for faster Unity workflows."
+    },
+    {
+      "id": "games",
+      "title": "Games",
+      "description": "Original games and interactive projects from Kianan Studio."
+    },
+    {
+      "id": "3d-assets",
+      "title": "3D Assets",
+      "description": "Reusable 3D assets and content for game development."
+    }
+  ],
+  "products": [
+    {
+      "id": "3d-collider",
+      "category": "unity-tools",
+      "title": "3D Collider",
+      "status": "Available soon",
+      "version": "1.0.0",
+      "shortDescription": "Generate colliders for complex meshes directly inside Unity.",
+      "description": "3D Collider generates surface-based Mesh Colliders for static geometry and compound collider solutions for Rigidbody workflows, helping preserve holes, tunnels, passages and other important spaces in complex models.",
+      "cover": "assets/images/3d-collider-cover.webp",
+      "gallery": [
+        "assets/images/3d-collider-planar.webp",
+        "assets/images/3d-collider-overview.webp",
+        "assets/images/3d-collider-unity.webp"
+      ],
+      "features": [
+        "Surface-based non-convex Mesh Colliders for static geometry",
+        "Closed convex collider workflow for Rigidbody objects",
+        "Support for complex, concave and open source meshes",
+        "Adjustable generation settings and Scene view visualization",
+        "Built-in, URP and HDRP compatible",
+        "No external package dependencies"
+      ],
+      "links": {
+        "primaryLabel": "View on Unity Asset Store",
+        "primaryUrl": "https://assetstore.unity.com/packages/slug/398482"
+      }
+    },
+    {
+      "id": "3deditor",
+      "category": "unity-tools",
+      "title": "3DEditor",
+      "status": "In development",
+      "version": "",
+      "shortDescription": "Create and edit 3D geometry directly inside Unity.",
+      "description": "An in-Editor 3D modeling workflow being developed by Kianan Studio.",
+      "cover": "",
+      "gallery": [],
+      "features": [],
+      "links": {}
+    }
+  ]
+}
