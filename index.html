@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Kianan Studio creates Unity tools, 3D assets and games." />
+  <meta name="description" content="Kianan Studio creates Unity tools, 3D assets and games. Explore 3D Collider for Unity and upcoming projects." />
   <meta name="theme-color" content="#080d12" />
   <meta property="og:title" content="Kianan Studio" />
   <meta property="og:description" content="Unity tools, 3D assets and games." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/3d-collider-cover.png" />
   <title>Kianan Studio — Unity Tools, 3D Assets & Games</title>
   <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
   <link rel="stylesheet" href="styles.css" />
@@ -23,9 +24,9 @@
       </a>
       <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
       <nav class="nav-links" aria-label="Main navigation">
-        <a href="#categories">Unity Tools</a>
-        <a href="#categories">Games</a>
-        <a href="#categories">3D Assets</a>
+        <a href="#categories" data-nav-category="unity-tools">Unity Tools</a>
+        <a href="#categories" data-nav-category="games">Games</a>
+        <a href="#categories" data-nav-category="3d-assets">3D Assets</a>
         <a href="#about">About</a>
         <a href="#contact">Contact</a>
       </nav>
@@ -43,12 +44,18 @@
           <p>Unity tools for creating, 3D assets for building, and original games for playing.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#categories">Explore projects</a>
-            <a class="button button-secondary" href="#contact">Contact</a>
+            <a class="button button-secondary" href="product.html?id=3d-collider">3D Collider</a>
           </div>
         </div>
-        <div class="hero-symbol" aria-hidden="true">
-          <div class="poly-k">K</div>
-          <div class="poly-cube"></div>
+        <div class="hero-product-showcase">
+          <a href="product.html?id=3d-collider" class="hero-product-image" aria-label="Open 3D Collider details">
+            <img src="assets/images/3d-collider-overview.webp" alt="3D Collider in Unity Editor" />
+          </a>
+          <div class="hero-product-caption">
+            <span class="eyebrow">Featured Unity Tool</span>
+            <strong>3D Collider</strong>
+            <span>Collider generation for complex meshes.</span>
+          </div>
         </div>
       </div>
     </section>
@@ -59,18 +66,91 @@
         <h2>Choose a category.</h2>
         <p>Select a category to see its tools, games or assets. Open any item for a dedicated page with details, media and links.</p>
       </div>
-      <div class="category-grid" id="category-grid" aria-live="polite"></div>
+
+      <div class="category-grid" id="category-grid" aria-live="polite">
+        <button class="category-card active" data-category="unity-tools">
+          <span class="category-icon">◇</span>
+          <span><strong>Unity Tools</strong><small>Tools and editor extensions for faster Unity workflows.</small></span>
+          <em>2</em>
+        </button>
+        <button class="category-card" data-category="games">
+          <span class="category-icon">🎮</span>
+          <span><strong>Games</strong><small>Original games and interactive projects from Kianan Studio.</small></span>
+          <em>0</em>
+        </button>
+        <button class="category-card" data-category="3d-assets">
+          <span class="category-icon">⬡</span>
+          <span><strong>3D Assets</strong><small>Reusable 3D assets and content for game development.</small></span>
+          <em>0</em>
+        </button>
+      </div>
+
       <div class="catalog-shell" id="catalog-shell">
-        <aside class="catalog-sidebar" id="catalog-sidebar"></aside>
+        <aside class="catalog-sidebar" id="catalog-sidebar">
+          <button class="sidebar-link active" data-sidebar-category="unity-tools"><span>Unity Tools</span><em>2</em></button>
+          <button class="sidebar-link" data-sidebar-category="games"><span>Games</span><em>0</em></button>
+          <button class="sidebar-link" data-sidebar-category="3d-assets"><span>3D Assets</span><em>0</em></button>
+        </aside>
         <section class="catalog-list-wrap">
           <div class="catalog-list-head">
             <div>
               <span class="eyebrow">Catalog</span>
-              <h3 id="catalog-title">Projects</h3>
+              <h3 id="catalog-title">Unity Tools</h3>
             </div>
           </div>
-          <div class="catalog-list" id="catalog-list"></div>
+          <div class="catalog-list" id="catalog-list">
+            <a class="catalog-item catalog-item-featured" href="product.html?id=3d-collider">
+              <div class="catalog-thumb"><img src="assets/images/3d-collider-cover.webp" alt="3D Collider product artwork" /></div>
+              <div class="catalog-item-copy">
+                <div class="catalog-meta"><span>Unity Asset Store</span><span>v1.0.0</span></div>
+                <h4>3D Collider</h4>
+                <p>Generate practical colliders for complex 3D meshes directly inside the Unity Editor. Supports surface-based MeshColliders and oriented compound BoxColliders for Rigidbody workflows.</p>
+              </div>
+              <span class="catalog-arrow">→</span>
+            </a>
+            <a class="catalog-item" href="product.html?id=3deditor">
+              <div class="catalog-thumb"><div class="item-placeholder">3D</div></div>
+              <div class="catalog-item-copy">
+                <div class="catalog-meta"><span>In development</span></div>
+                <h4>3DEditor</h4>
+                <p>Create and edit 3D geometry directly inside Unity.</p>
+              </div>
+              <span class="catalog-arrow">→</span>
+            </a>
+          </div>
         </section>
+      </div>
+    </section>
+
+    <section class="section featured-tool-section" id="featured-3d-collider">
+      <div class="section-heading">
+        <span class="eyebrow">Featured Unity Tool</span>
+        <h2>3D Collider</h2>
+        <p>A Unity Editor tool for generating colliders from complex meshes while preserving important spaces such as openings, holes, tunnels and passages.</p>
+      </div>
+      <div class="featured-tool-grid">
+        <a class="featured-tool-main-image" href="product.html?id=3d-collider">
+          <img src="assets/images/3d-collider-planar.webp" alt="3D Collider surface-based collider generation preserving openings" />
+        </a>
+        <div class="featured-tool-copy">
+          <h3>Two workflows for different physics needs.</h3>
+          <ul class="feature-list">
+            <li>Surface-based MeshCollider generation for static geometry</li>
+            <li>Preserves openings, holes, tunnels and passages</li>
+            <li>Oriented compound BoxCollider generation for Rigidbody objects</li>
+            <li>Adjustable Accuracy with real-time Editor preview</li>
+            <li>Closed-mesh validation for Convex generation</li>
+            <li>Built-in, URP and HDRP compatible</li>
+          </ul>
+          <div class="hero-actions">
+            <a class="button button-primary" href="product.html?id=3d-collider">View full details</a>
+            <a class="button button-secondary store-link" data-store-link href="https://assetstore.unity.com/packages/slug/398482" target="_blank" rel="noopener">Unity Asset Store</a>
+          </div>
+        </div>
+      </div>
+      <div class="mini-gallery">
+        <img src="assets/images/3d-collider-overview.webp" alt="3D Collider overview" loading="lazy" />
+        <img src="assets/images/3d-collider-unity.webp" alt="3D Collider Unity Editor screenshot" loading="lazy" />
       </div>
     </section>
 
