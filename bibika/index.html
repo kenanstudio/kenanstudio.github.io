@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#070b10" />
   <title>Bibika — панель управления Kianan Studio</title>
   <link rel="stylesheet" href="styles.css" />
-  <script defer src="app.js"></script>
+  <script defer src="app-v2.js?v=2"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -23,8 +23,8 @@
       </nav>
 
       <div class="sidebar-note">
-        <strong>Тестовый режим</strong>
-        <p>Сейчас изменения сохраняются только в этом браузере. Публичный сайт не меняется.</p>
+        <strong>Рабочий режим</strong>
+        <p>Изменения публикуются в GitHub и обновляют каталог Kianan Studio.</p>
       </div>
     </aside>
 
@@ -35,7 +35,7 @@
           <h1 id="page-title">Панель управления</h1>
         </div>
         <div class="top-actions">
-          <button class="btn btn-ghost" id="reset-local">Сбросить тестовые изменения</button>
+          <button class="btn btn-ghost" id="reset-local">Обновить из GitHub</button>
           <a class="btn btn-ghost" href="https://kiananstudio.com" target="_blank" rel="noreferrer">Открыть сайт ↗</a>
           <button class="btn btn-primary" id="add-product-top">+ Добавить продукт</button>
         </div>
@@ -44,10 +44,10 @@
       <section class="view active" id="view-dashboard">
         <div class="status-banner">
           <div>
-            <strong>Интерфейс Bibika работает в режиме предпросмотра</strong>
-            <span>Следующим этапом подключим Cloudflare Worker и безопасное сохранение в GitHub.</span>
+            <strong>Bibika подключена к GitHub</strong>
+            <span>Сохранение, добавление и удаление продуктов публикуют изменения в data/products.json.</span>
           </div>
-          <span class="status-pill">V1</span>
+          <span class="status-pill">LIVE</span>
         </div>
 
         <div class="stats-grid">
@@ -199,7 +199,7 @@
               <label class="field">
                 <span>Обложка</span>
                 <input id="f-cover" placeholder="assets/images/product-cover.webp" />
-                <small>Пока указываем путь к файлу. Загрузку изображений подключим на следующем этапе.</small>
+                <small>Укажи путь к изображению на сайте. Загрузку файлов добавим отдельным этапом.</small>
               </label>
               <div class="section-line compact">
                 <div>
@@ -250,7 +250,7 @@
         </div>
 
         <footer class="modal-actions">
-          <span id="form-state" class="form-state">Изменения пока не опубликованы на сайте.</span>
+          <span id="form-state" class="form-state">После сохранения изменения будут опубликованы в GitHub и на сайте.</span>
           <div>
             <button type="button" class="btn btn-ghost" id="cancel-editor">Отмена</button>
             <button type="submit" class="btn btn-primary">Сохранить изменения</button>
@@ -264,7 +264,7 @@
     <section class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-title">
       <div class="danger-icon">!</div>
       <h2 id="delete-title">Удалить продукт?</h2>
-      <p id="delete-copy">Это действие удалит продукт из тестового каталога Bibika.</p>
+      <p id="delete-copy">Это действие удалит продукт с публичного сайта.</p>
       <div class="confirm-actions">
         <button class="btn btn-ghost" id="cancel-delete">Отмена</button>
         <button class="btn btn-danger" id="confirm-delete">Удалить</button>
