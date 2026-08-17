@@ -3,6 +3,7 @@ const GITHUB_REPO = "kiananstudio.github.io";
 const GITHUB_BRANCH = "main";
 const CATALOG_PATH = "data/products.json";
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CATALOG_PATH}`;
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 function unauthorized() {
   return new Response("Authentication required", {
@@ -42,13 +43,32 @@ function decodeBase64Utf8(value) {
 }
 
 function encodeBase64Utf8(value) {
-  const bytes = new TextEncoder().encode(value);
+  return encodeBytesBase64(new TextEncoder().encode(value));
+}
+
+function encodeBytesBase64(bytes) {
   let binary = "";
   const chunkSize = 0x8000;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
   }
   return btoa(binary);
+}
+
+function sanitizeSlug(value, fallback = "product") {
+  const result = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 70);
+  return result || fallback;
+}
+
+function githubContentsUrl(path) {
+  const encodedPath = path.split("/").map((part) => encodeURIComponent(part)).join("/");
+  return `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodedPath}`;
 }
 
 function validateCatalog(data) {
@@ -110,6 +130,29 @@ async function putGitHubCatalog(env, data, message) {
   return payload;
 }
 
+async function putGitHubImage(env, path, bytes, message) {
+  const response = await fetch(githubContentsUrl(path), {
+    method: "PUT",
+    headers: {
+      ...githubHeaders(env),
+      "Content-Type": "application/json; charset=utf-8",
+    },
+    body: JSON.stringify({
+      message: String(message || "Bibika: upload image").slice(0, 120),
+      content: encodeBytesBase64(bytes),
+      branch: GITHUB_BRANCH,
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(payload.message || `GitHub HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  return payload;
+}
+
 async function handleCatalogApi(request, env) {
   if (!env.GITHUB_TOKEN) {
     return jsonResponse({ error: "GitHub publishing is not configured." }, 503);
@@ -151,6 +194,55 @@ async function handleCatalogApi(request, env) {
   return jsonResponse({ error: "Method not allowed." }, 405);
 }
 
+async function handleImageApi(request, env) {
+  if (!env.GITHUB_TOKEN) return jsonResponse({ error: "GitHub publishing is not configured." }, 503);
+  if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
+
+  const contentType = String(request.headers.get("Content-Type") || "").split(";", 1)[0].trim().toLowerCase();
+  if (contentType !== "image/webp") {
+    return jsonResponse({ error: "Bibika принимает на сервер только подготовленный WEBP." }, 415);
+  }
+
+  const productId = sanitizeSlug(request.headers.get("X-Bibika-Product"));
+  const target = String(request.headers.get("X-Bibika-Target") || "").toLowerCase();
+  if (target !== "cover" && target !== "gallery") {
+    return jsonResponse({ error: "Некорректное назначение изображения." }, 400);
+  }
+
+  const declaredLength = Number(request.headers.get("Content-Length") || 0);
+  if (declaredLength > MAX_IMAGE_BYTES) {
+    return jsonResponse({ error: "Готовое изображение слишком большое. Максимум 4 МБ." }, 413);
+  }
+
+  const buffer = await request.arrayBuffer();
+  if (!buffer.byteLength) return jsonResponse({ error: "Пустой файл изображения." }, 400);
+  if (buffer.byteLength > MAX_IMAGE_BYTES) {
+    return jsonResponse({ error: "Готовое изображение слишком большое. Максимум 4 МБ." }, 413);
+  }
+
+  const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+  const suffix = crypto.randomUUID().slice(0, 8);
+  const path = `assets/images/${productId}-${target}-${stamp}-${suffix}.webp`;
+
+  try {
+    const result = await putGitHubImage(
+      env,
+      path,
+      new Uint8Array(buffer),
+      `Bibika: upload ${target} for ${productId}`
+    );
+    return jsonResponse({
+      ok: true,
+      path,
+      bytes: buffer.byteLength,
+      commit: result.commit?.sha || null,
+      url: result.content?.html_url || null,
+    });
+  } catch (error) {
+    return jsonResponse({ error: `Не удалось загрузить изображение в GitHub: ${error.message}` }, 502);
+  }
+}
+
 async function handleRequest(request, env) {
   const expectedUser = env.BIBIKA_USER;
   const expectedPassword = env.BIBIKA_PASSWORD;
@@ -183,9 +275,8 @@ async function handleRequest(request, env) {
   if (username !== expectedUser || password !== expectedPassword) return unauthorized();
 
   const url = new URL(request.url);
-  if (url.pathname === "/api/catalog") {
-    return handleCatalogApi(request, env);
-  }
+  if (url.pathname === "/api/catalog") return handleCatalogApi(request, env);
+  if (url.pathname === "/api/image") return handleImageApi(request, env);
 
   const response = await env.ASSETS.fetch(request);
   const headers = new Headers(response.headers);
@@ -197,8 +288,10 @@ async function handleRequest(request, env) {
   const contentType = response.headers.get("Content-Type") || "";
   if (contentType.includes("text/html")) {
     const html = await response.text();
+    const imageEditor = `<script defer src="/image-editor.js?v=1"></script>`;
     const hotfix = `<script>window.addEventListener("DOMContentLoaded",function(){try{publishData=function(nextState,message){return requestJson("/api/catalog",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:nextState,message:message})});};}catch(e){console.error("Bibika publish hotfix",e);}});</script>`;
-    const patched = html.includes("</body>") ? html.replace("</body>", `${hotfix}</body>`) : `${html}${hotfix}`;
+    const additions = `${imageEditor}${hotfix}`;
+    const patched = html.includes("</body>") ? html.replace("</body>", `${additions}</body>`) : `${html}${additions}`;
     return new Response(patched, { status: response.status, statusText: response.statusText, headers });
   }
 
