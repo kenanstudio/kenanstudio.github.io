@@ -1,3 +1,4 @@
+// Redeploy trigger after configuring Cloudflare secrets.
 function unauthorized() {
   return new Response("Authentication required", {
     status: 401,
