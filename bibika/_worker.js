@@ -2,6 +2,7 @@ const GITHUB_OWNER = "kiananstudio";
 const GITHUB_REPO = "kiananstudio.github.io";
 const GITHUB_BRANCH = "main";
 const CATALOG_PATH = "data/products.json";
+const IMAGE_DIR = "assets/images";
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CATALOG_PATH}`;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_CLEANUP_PATHS = 30;
@@ -153,7 +154,7 @@ async function putGitHubCatalog(env, data, message) {
     error.status = response.status;
     throw error;
   }
-  return { payload, previousData: current.data };
+  return payload;
 }
 
 async function putGitHubImage(env, path, bytes, message) {
@@ -192,6 +193,24 @@ async function getGitHubFileMeta(env, path) {
     throw error;
   }
   return payload;
+}
+
+async function listBibikaManagedImages(env) {
+  const response = await fetch(`${githubContentsUrl(IMAGE_DIR)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+    method: "GET",
+    headers: githubHeaders(env),
+  });
+  if (response.status === 404) return [];
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(payload?.message || `GitHub HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  if (!Array.isArray(payload)) return [];
+  return payload
+    .filter((item) => item?.type === "file" && isBibikaManagedImage(item.path))
+    .map((item) => normalizeImagePath(item.path));
 }
 
 async function deleteGitHubImage(env, path, message) {
@@ -251,11 +270,16 @@ async function cleanupCandidates(env, candidates, referencedImages = null) {
   return { deleted, skipped, failed };
 }
 
-async function cleanupRemovedCatalogImages(env, previousData, nextData) {
-  const previous = collectCatalogImages(previousData);
-  const next = collectCatalogImages(nextData);
-  const removed = [...previous].filter((path) => !next.has(path) && isBibikaManagedImage(path));
-  return cleanupCandidates(env, removed, next);
+async function cleanupAllOrphanedImages(env, catalogData) {
+  const refs = collectCatalogImages(catalogData);
+  const managed = await listBibikaManagedImages(env);
+  const orphaned = managed.filter((path) => !refs.has(path));
+  const result = await cleanupCandidates(env, orphaned, refs);
+  return {
+    ...result,
+    found: orphaned.length,
+    remaining: Math.max(0, orphaned.length - MAX_CLEANUP_PATHS),
+  };
 }
 
 async function handleCatalogApi(request, env) {
@@ -281,19 +305,33 @@ async function handleCatalogApi(request, env) {
     const errorMessage = validateCatalog(body?.data);
     if (errorMessage) return jsonResponse({ error: errorMessage }, 400);
 
+    let result;
     try {
-      const result = await putGitHubCatalog(env, body.data, body.message);
-      const cleanup = await cleanupRemovedCatalogImages(env, result.previousData, body.data);
-      return jsonResponse({
-        ok: true,
-        commit: result.payload.commit?.sha || null,
-        url: result.payload.commit?.html_url || null,
-        cleanup,
-      });
+      result = await putGitHubCatalog(env, body.data, body.message);
     } catch (error) {
       const status = error.status === 409 ? 409 : 502;
       return jsonResponse({ error: `Не удалось опубликовать изменения в GitHub: ${error.message}` }, status);
     }
+
+    let cleanup;
+    try {
+      cleanup = await cleanupAllOrphanedImages(env, body.data);
+    } catch (error) {
+      cleanup = {
+        deleted: [],
+        skipped: [],
+        failed: [{ path: "*", error: error.message }],
+        found: null,
+        remaining: null,
+      };
+    }
+
+    return jsonResponse({
+      ok: true,
+      commit: result.commit?.sha || null,
+      url: result.commit?.html_url || null,
+      cleanup,
+    });
   }
 
   return jsonResponse({ error: "Method not allowed." }, 405);
@@ -327,7 +365,7 @@ async function handleImageApi(request, env) {
 
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
   const suffix = crypto.randomUUID().slice(0, 8);
-  const path = `assets/images/${productId}-${target}-${stamp}-${suffix}.webp`;
+  const path = `${IMAGE_DIR}/${productId}-${target}-${stamp}-${suffix}.webp`;
 
   try {
     const result = await putGitHubImage(
