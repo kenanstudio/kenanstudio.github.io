@@ -1,4 +1,4 @@
-// Redeploy trigger after configuring Cloudflare secrets.
+// Temporary diagnostic for Cloudflare Pages authentication bindings.
 function unauthorized() {
   return new Response("Authentication required", {
     status: 401,
@@ -15,9 +15,12 @@ export default {
     const expectedUser = env.BIBIKA_USER;
     const expectedPassword = env.BIBIKA_PASSWORD;
 
-    // Fail closed if the Cloudflare secrets have not been configured yet.
     if (!expectedUser || !expectedPassword) {
-      return new Response("Bibika authentication is not configured.", {
+      const missing = [];
+      if (!expectedUser) missing.push("BIBIKA_USER");
+      if (!expectedPassword) missing.push("BIBIKA_PASSWORD");
+
+      return new Response(`Bibika authentication binding missing: ${missing.join(", ")}.`, {
         status: 503,
         headers: {
           "Cache-Control": "no-store",
