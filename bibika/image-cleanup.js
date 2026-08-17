@@ -2,6 +2,9 @@
   const pending = new Set();
   const nativeFetch = window.fetch.bind(window);
   const LIVE_SITE_URL = "https://kiananstudio.com";
+  let observer = null;
+  let observerScheduled = false;
+  let uiRefreshRunning = false;
 
   function normalizePath(value) {
     return String(value || "").trim().replace(/^\/+/, "").split(/[?#]/, 1)[0];
@@ -184,11 +187,10 @@
     }
     const title = info.querySelector("strong");
     const code = info.querySelector("code");
-    if (title) title.textContent = `Изображение ${index + 1}`;
-    if (code) {
-      code.textContent = rawPath;
-      code.title = rawPath;
-    }
+    const nextTitle = `Изображение ${index + 1}`;
+    if (title && title.textContent !== nextTitle) title.textContent = nextTitle;
+    if (code && code.textContent !== rawPath) code.textContent = rawPath;
+    if (code && code.title !== rawPath) code.title = rawPath;
 
     let controls = row.querySelector(".gallery-card-controls");
     if (!controls) {
@@ -226,7 +228,10 @@
     const list = document.querySelector("#gallery-editor");
     if (!list) return;
     const rows = [...list.querySelectorAll(":scope > .repeat-item")];
-    list.classList.toggle("gallery-cards", rows.some((row) => normalizePath(row.querySelector(".repeat-value")?.value)));
+    const shouldUseCards = rows.some((row) => normalizePath(row.querySelector(".repeat-value")?.value));
+    if (list.classList.contains("gallery-cards") !== shouldUseCards) {
+      list.classList.toggle("gallery-cards", shouldUseCards);
+    }
     rows.forEach((row, index) => ensureGalleryCard(row, index, rows.length));
   }
 
@@ -234,6 +239,32 @@
     ensureRemovalStyles();
     syncCoverRemoveButton();
     refreshGalleryCards();
+  }
+
+  function startObserver() {
+    if (!observer) return;
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  function runUiRefresh() {
+    if (uiRefreshRunning) return;
+    uiRefreshRunning = true;
+    observer?.disconnect();
+    try {
+      ensureRemovalUi();
+    } finally {
+      uiRefreshRunning = false;
+      startObserver();
+    }
+  }
+
+  function scheduleUiRefresh() {
+    if (observerScheduled || uiRefreshRunning) return;
+    observerScheduled = true;
+    requestAnimationFrame(() => {
+      observerScheduled = false;
+      runUiRefresh();
+    });
   }
 
   window.fetch = async function bibikaFetch(input, init = {}) {
@@ -272,7 +303,7 @@
       const previous = row?.previousElementSibling;
       if (row && previous) {
         row.parentElement.insertBefore(row, previous);
-        refreshGalleryCards();
+        runUiRefresh();
         showToast("Порядок галереи изменён. Он применится после сохранения продукта.");
       }
       return;
@@ -284,7 +315,7 @@
       const next = row?.nextElementSibling;
       if (row && next) {
         row.parentElement.insertBefore(next, row);
-        refreshGalleryCards();
+        runUiRefresh();
         showToast("Порядок галереи изменён. Он применится после сохранения продукта.");
       }
       return;
@@ -305,7 +336,7 @@
     if (galleryRemove) {
       setTimeout(() => {
         showToast("Изображение убрано из галереи. Изменение применится после сохранения продукта.", 4600);
-        refreshGalleryCards();
+        runUiRefresh();
       }, 0);
       return;
     }
@@ -321,7 +352,7 @@
 
   document.addEventListener("input", (event) => {
     if (event.target?.id === "f-cover") syncCoverRemoveButton();
-    if (event.target?.closest?.("#gallery-editor")) refreshGalleryCards();
+    if (event.target?.closest?.("#gallery-editor")) runUiRefresh();
   });
 
   document.addEventListener("keydown", (event) => {
@@ -331,13 +362,26 @@
     if (productEditor && !imageEditor) cleanupPending();
   }, true);
 
-  const observer = new MutationObserver(() => ensureRemovalUi());
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  observer = new MutationObserver((mutations) => {
+    const relevant = mutations.some((mutation) => {
+      const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
+      if (target?.closest?.("#gallery-editor")) return true;
+      return [...mutation.addedNodes].some((node) =>
+        node instanceof Element && (
+          node.matches?.("#gallery-editor, #upload-cover, .repeat-item") ||
+          node.querySelector?.("#gallery-editor, #upload-cover, .repeat-item")
+        )
+      );
+    });
+    if (relevant) scheduleUiRefresh();
+  });
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", ensureRemovalUi, { once: true });
+    document.addEventListener("DOMContentLoaded", () => {
+      runUiRefresh();
+    }, { once: true });
   } else {
-    ensureRemovalUi();
+    runUiRefresh();
   }
 
   window.addEventListener("pagehide", () => cleanupPending({ keepalive: true }));
