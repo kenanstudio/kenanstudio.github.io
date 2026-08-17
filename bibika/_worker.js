@@ -68,12 +68,15 @@ function validateCatalog(data) {
 }
 
 async function getGitHubCatalog(env) {
-  const response = await fetch(`${GITHUB_API}?ref=${encodeURIComponent(GITHUB_BRANCH)}&t=${Date.now()}`, {
+  const response = await fetch(`${GITHUB_API}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+    method: "GET",
     headers: githubHeaders(env),
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload.message || `GitHub HTTP ${response.status}`);
+    const error = new Error(payload.message || `GitHub HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
 
   const data = JSON.parse(decodeBase64Utf8(payload.content));
@@ -88,7 +91,7 @@ async function putGitHubCatalog(env, data, message) {
     method: "PUT",
     headers: {
       ...githubHeaders(env),
-      "Content-Type": "application/json",
+      "Content-Type": "application/json; charset=utf-8",
     },
     body: JSON.stringify({
       message: String(message || "Update website catalog from Bibika").slice(0, 120),
@@ -121,7 +124,7 @@ async function handleCatalogApi(request, env) {
     }
   }
 
-  if (request.method === "PUT") {
+  if (request.method === "POST" || request.method === "PUT") {
     let body;
     try {
       body = await request.json();
@@ -148,49 +151,76 @@ async function handleCatalogApi(request, env) {
   return jsonResponse({ error: "Method not allowed." }, 405);
 }
 
+async function handleRequest(request, env) {
+  const expectedUser = env.BIBIKA_USER;
+  const expectedPassword = env.BIBIKA_PASSWORD;
+
+  if (!expectedUser || !expectedPassword) {
+    return new Response("Bibika authentication is not configured.", {
+      status: 503,
+      headers: {
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
+
+  const authorization = request.headers.get("Authorization");
+  if (!authorization || !authorization.startsWith("Basic ")) return unauthorized();
+
+  let credentials;
+  try {
+    credentials = atob(authorization.slice(6));
+  } catch {
+    return unauthorized();
+  }
+
+  const separator = credentials.indexOf(":");
+  if (separator < 0) return unauthorized();
+
+  const username = credentials.slice(0, separator);
+  const password = credentials.slice(separator + 1);
+  if (username !== expectedUser || password !== expectedPassword) return unauthorized();
+
+  const url = new URL(request.url);
+  if (url.pathname === "/api/catalog") {
+    return handleCatalogApi(request, env);
+  }
+
+  const response = await env.ASSETS.fetch(request);
+  const headers = new Headers(response.headers);
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("Referrer-Policy", "no-referrer");
+  headers.set("Cache-Control", "no-store");
+
+  const contentType = response.headers.get("Content-Type") || "";
+  if (contentType.includes("text/html")) {
+    const html = await response.text();
+    const hotfix = `<script>window.addEventListener("DOMContentLoaded",function(){try{publishData=function(nextState,message){return requestJson("/api/catalog",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:nextState,message:message})});};}catch(e){console.error("Bibika publish hotfix",e);}});</script>`;
+    const patched = html.includes("</body>") ? html.replace("</body>", `${hotfix}</body>`) : `${html}${hotfix}`;
+    return new Response(patched, { status: response.status, statusText: response.statusText, headers });
+  }
+
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 export default {
   async fetch(request, env) {
-    const expectedUser = env.BIBIKA_USER;
-    const expectedPassword = env.BIBIKA_PASSWORD;
-
-    if (!expectedUser || !expectedPassword) {
-      return new Response("Bibika authentication is not configured.", {
-        status: 503,
+    try {
+      return await handleRequest(request, env);
+    } catch (error) {
+      const url = new URL(request.url);
+      if (url.pathname.startsWith("/api/")) {
+        return jsonResponse({ error: `Внутренняя ошибка Bibika Worker: ${error?.message || String(error)}` }, 500);
+      }
+      return new Response("Bibika Worker error", {
+        status: 500,
         headers: {
           "Cache-Control": "no-store",
-          "X-Content-Type-Options": "nosniff",
+          "Content-Type": "text/plain; charset=utf-8",
         },
       });
     }
-
-    const authorization = request.headers.get("Authorization");
-    if (!authorization || !authorization.startsWith("Basic ")) return unauthorized();
-
-    let credentials;
-    try {
-      credentials = atob(authorization.slice(6));
-    } catch {
-      return unauthorized();
-    }
-
-    const separator = credentials.indexOf(":");
-    if (separator < 0) return unauthorized();
-
-    const username = credentials.slice(0, separator);
-    const password = credentials.slice(separator + 1);
-    if (username !== expectedUser || password !== expectedPassword) return unauthorized();
-
-    const url = new URL(request.url);
-    if (url.pathname === "/api/catalog") {
-      return handleCatalogApi(request, env);
-    }
-
-    const response = await env.ASSETS.fetch(request);
-    const headers = new Headers(response.headers);
-    headers.set("X-Content-Type-Options", "nosniff");
-    headers.set("X-Frame-Options", "DENY");
-    headers.set("Referrer-Policy", "no-referrer");
-    if (url.pathname === "/" || url.pathname.endsWith(".html")) headers.set("Cache-Control", "no-store");
-    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };
