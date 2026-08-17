@@ -40,10 +40,22 @@
         "No external package dependencies"
       ],
       "specs": [
-        ["Unity", "2022.3+"],
-        ["Platforms tested", "macOS · Windows"],
-        ["Render pipelines", "Built-in · URP · HDRP"],
-        ["Source", "Full C# source included"]
+        [
+          "Unity",
+          "2022.3+"
+        ],
+        [
+          "Platforms tested",
+          "macOS · Windows"
+        ],
+        [
+          "Render pipelines",
+          "Built-in · URP · HDRP"
+        ],
+        [
+          "Source",
+          "Full C# source included"
+        ]
       ],
       "links": {
         "primaryLabel": "View on Unity Asset Store",
@@ -61,7 +73,11 @@
       "cover": "",
       "gallery": [],
       "features": [],
-      "links": {}
+      "specs": [],
+      "links": {
+        "primaryLabel": "",
+        "primaryUrl": ""
+      }
     }
   ]
 }
