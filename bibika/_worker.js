@@ -4,6 +4,8 @@ const GITHUB_BRANCH = "main";
 const CATALOG_PATH = "data/products.json";
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CATALOG_PATH}`;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_CLEANUP_PATHS = 30;
+const BIBIKA_IMAGE_RE = /^assets\/images\/[a-z0-9-]+-(cover|gallery)-\d{14}-[a-f0-9]{8}\.webp$/;
 
 function unauthorized() {
   return new Response("Authentication required", {
@@ -29,8 +31,8 @@ function jsonResponse(value, status = 200) {
 
 function githubHeaders(env) {
   return {
-    "Accept": "application/vnd.github+json",
-    "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
     "X-GitHub-Api-Version": "2022-11-28",
     "User-Agent": "Kianan-Studio-Bibika",
   };
@@ -66,8 +68,32 @@ function sanitizeSlug(value, fallback = "product") {
   return result || fallback;
 }
 
+function normalizeImagePath(value) {
+  return String(value || "").trim().replace(/^\/+/, "").split(/[?#]/, 1)[0];
+}
+
+function isBibikaManagedImage(path) {
+  return BIBIKA_IMAGE_RE.test(normalizeImagePath(path));
+}
+
+function collectCatalogImages(data) {
+  const result = new Set();
+  for (const product of data?.products || []) {
+    const cover = normalizeImagePath(product?.cover);
+    if (cover) result.add(cover);
+    for (const item of Array.isArray(product?.gallery) ? product.gallery : []) {
+      const path = normalizeImagePath(item);
+      if (path) result.add(path);
+    }
+  }
+  return result;
+}
+
 function githubContentsUrl(path) {
-  const encodedPath = path.split("/").map((part) => encodeURIComponent(part)).join("/");
+  const encodedPath = normalizeImagePath(path)
+    .split("/")
+    .map((part) => encodeURIComponent(part))
+    .join("/");
   return `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodedPath}`;
 }
 
@@ -127,7 +153,7 @@ async function putGitHubCatalog(env, data, message) {
     error.status = response.status;
     throw error;
   }
-  return payload;
+  return { payload, previousData: current.data };
 }
 
 async function putGitHubImage(env, path, bytes, message) {
@@ -153,10 +179,87 @@ async function putGitHubImage(env, path, bytes, message) {
   return payload;
 }
 
-async function handleCatalogApi(request, env) {
-  if (!env.GITHUB_TOKEN) {
-    return jsonResponse({ error: "GitHub publishing is not configured." }, 503);
+async function getGitHubFileMeta(env, path) {
+  const response = await fetch(`${githubContentsUrl(path)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+    method: "GET",
+    headers: githubHeaders(env),
+  });
+  if (response.status === 404) return null;
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(payload.message || `GitHub HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
+  return payload;
+}
+
+async function deleteGitHubImage(env, path, message) {
+  const normalized = normalizeImagePath(path);
+  if (!isBibikaManagedImage(normalized)) return { deleted: false, reason: "not-managed" };
+
+  const meta = await getGitHubFileMeta(env, normalized);
+  if (!meta) return { deleted: false, reason: "missing" };
+
+  const response = await fetch(githubContentsUrl(normalized), {
+    method: "DELETE",
+    headers: {
+      ...githubHeaders(env),
+      "Content-Type": "application/json; charset=utf-8",
+    },
+    body: JSON.stringify({
+      message: String(message || "Bibika: remove unused image").slice(0, 120),
+      sha: meta.sha,
+      branch: GITHUB_BRANCH,
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(payload.message || `GitHub HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  return { deleted: true, commit: payload.commit?.sha || null };
+}
+
+async function cleanupCandidates(env, candidates, referencedImages = null) {
+  const refs = referencedImages || collectCatalogImages((await getGitHubCatalog(env)).data);
+  const unique = [...new Set((candidates || []).map(normalizeImagePath).filter(Boolean))].slice(0, MAX_CLEANUP_PATHS);
+  const deleted = [];
+  const skipped = [];
+  const failed = [];
+
+  for (const path of unique) {
+    if (!isBibikaManagedImage(path)) {
+      skipped.push({ path, reason: "not-managed" });
+      continue;
+    }
+    if (refs.has(path)) {
+      skipped.push({ path, reason: "referenced" });
+      continue;
+    }
+    try {
+      const result = await deleteGitHubImage(env, path, `Bibika: remove unused image ${path.split("/").pop()}`);
+      if (result.deleted) deleted.push(path);
+      else skipped.push({ path, reason: result.reason || "not-deleted" });
+    } catch (error) {
+      failed.push({ path, error: error.message });
+    }
+  }
+
+  return { deleted, skipped, failed };
+}
+
+async function cleanupRemovedCatalogImages(env, previousData, nextData) {
+  const previous = collectCatalogImages(previousData);
+  const next = collectCatalogImages(nextData);
+  const removed = [...previous].filter((path) => !next.has(path) && isBibikaManagedImage(path));
+  return cleanupCandidates(env, removed, next);
+}
+
+async function handleCatalogApi(request, env) {
+  if (!env.GITHUB_TOKEN) return jsonResponse({ error: "GitHub publishing is not configured." }, 503);
 
   if (request.method === "GET") {
     try {
@@ -180,10 +283,12 @@ async function handleCatalogApi(request, env) {
 
     try {
       const result = await putGitHubCatalog(env, body.data, body.message);
+      const cleanup = await cleanupRemovedCatalogImages(env, result.previousData, body.data);
       return jsonResponse({
         ok: true,
-        commit: result.commit?.sha || null,
-        url: result.commit?.html_url || null,
+        commit: result.payload.commit?.sha || null,
+        url: result.payload.commit?.html_url || null,
+        cleanup,
       });
     } catch (error) {
       const status = error.status === 409 ? 409 : 502;
@@ -243,6 +348,29 @@ async function handleImageApi(request, env) {
   }
 }
 
+async function handleImageCleanupApi(request, env) {
+  if (!env.GITHUB_TOKEN) return jsonResponse({ error: "GitHub publishing is not configured." }, 503);
+  if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Некорректный JSON." }, 400);
+  }
+
+  const paths = Array.isArray(body?.paths) ? body.paths : [];
+  if (!paths.length) return jsonResponse({ ok: true, deleted: [], skipped: [], failed: [] });
+  if (paths.length > MAX_CLEANUP_PATHS) return jsonResponse({ error: "Слишком много файлов для очистки за один запрос." }, 400);
+
+  try {
+    const result = await cleanupCandidates(env, paths);
+    return jsonResponse({ ok: true, ...result });
+  } catch (error) {
+    return jsonResponse({ error: `Не удалось очистить изображения: ${error.message}` }, 502);
+  }
+}
+
 async function handleRequest(request, env) {
   const expectedUser = env.BIBIKA_USER;
   const expectedPassword = env.BIBIKA_PASSWORD;
@@ -277,6 +405,7 @@ async function handleRequest(request, env) {
   const url = new URL(request.url);
   if (url.pathname === "/api/catalog") return handleCatalogApi(request, env);
   if (url.pathname === "/api/image") return handleImageApi(request, env);
+  if (url.pathname === "/api/image/cleanup") return handleImageCleanupApi(request, env);
 
   const response = await env.ASSETS.fetch(request);
   const headers = new Headers(response.headers);
@@ -289,8 +418,9 @@ async function handleRequest(request, env) {
   if (contentType.includes("text/html")) {
     const html = await response.text();
     const imageEditor = `<script defer src="/image-editor.js?v=1"></script>`;
+    const imageCleanup = `<script defer src="/image-cleanup.js?v=1"></script>`;
     const hotfix = `<script>window.addEventListener("DOMContentLoaded",function(){try{publishData=function(nextState,message){return requestJson("/api/catalog",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:nextState,message:message})});};}catch(e){console.error("Bibika publish hotfix",e);}});</script>`;
-    const additions = `${imageEditor}${hotfix}`;
+    const additions = `${imageEditor}${imageCleanup}${hotfix}`;
     const patched = html.includes("</body>") ? html.replace("</body>", `${additions}</body>`) : `${html}${additions}`;
     return new Response(patched, { status: response.status, statusText: response.statusText, headers });
   }
