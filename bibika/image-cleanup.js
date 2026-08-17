@@ -1,9 +1,17 @@
 (() => {
   const pending = new Set();
   const nativeFetch = window.fetch.bind(window);
+  const LIVE_SITE_URL = "https://kiananstudio.com";
 
   function normalizePath(value) {
     return String(value || "").trim().replace(/^\/+/, "").split(/[?#]/, 1)[0];
+  }
+
+  function imageUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return `${LIVE_SITE_URL}/${raw.replace(/^\//, "")}`;
   }
 
   function showToast(message, duration = 4200) {
@@ -65,7 +73,20 @@
     style.textContent = `
       .image-field-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
       #remove-cover-image:disabled{opacity:.42;cursor:not-allowed;transform:none}
+      #gallery-editor.gallery-cards{display:grid;gap:12px}
+      #gallery-editor .gallery-card{position:relative;display:grid!important;grid-template-columns:136px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px;border:1px solid rgba(127,175,213,.18);border-radius:14px;background:rgba(255,255,255,.025)}
+      #gallery-editor .gallery-card-preview{width:136px;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:#081018;border:1px solid rgba(255,255,255,.08);display:grid;place-items:center}
+      #gallery-editor .gallery-card-preview img{width:100%;height:100%;object-fit:cover;display:block}
+      #gallery-editor .gallery-card-preview span{display:none;color:#8293a3;font-size:.78rem;text-align:center;padding:8px}
+      #gallery-editor .gallery-card-info{min-width:0;display:flex;flex-direction:column;gap:4px}
+      #gallery-editor .gallery-card-info strong{font-size:.96rem;color:#eef5fb}
+      #gallery-editor .gallery-card-info code{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8fa1b1;font:inherit;font-size:.78rem}
+      #gallery-editor .gallery-path-input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;border:0!important}
+      #gallery-editor .gallery-card-controls{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+      #gallery-editor .gallery-order-btn{width:38px;height:38px;padding:0;display:inline-grid;place-items:center;font-size:1rem}
+      #gallery-editor .gallery-order-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
       #gallery-editor .gallery-image-remove{width:auto;min-width:86px;padding:0 12px;white-space:nowrap}
+      @media(max-width:720px){#gallery-editor .gallery-card{grid-template-columns:100px minmax(0,1fr)}#gallery-editor .gallery-card-preview{width:100px}.gallery-card-controls{grid-column:1/-1!important;justify-content:flex-start!important}}
       @media(max-width:560px){.image-field-head{align-items:flex-start;gap:10px}.image-field-actions{width:100%;justify-content:flex-start}.image-field-actions .btn{flex:1}}
     `;
     document.head.appendChild(style);
@@ -103,19 +124,116 @@
     remove.disabled = !normalizePath(cover.value);
   }
 
-  function upgradeGalleryRemoveButtons() {
-    document.querySelectorAll("#gallery-editor .remove-row").forEach((button) => {
-      button.classList.add("gallery-image-remove");
-      button.textContent = "Удалить";
-      button.title = "Удалить изображение из галереи";
-      button.setAttribute("aria-label", "Удалить изображение из галереи");
-    });
+  function ensureGalleryCard(row, index, total) {
+    const input = row.querySelector(".repeat-value");
+    if (!input) return;
+    const rawPath = String(input.value || "").trim();
+    const path = normalizePath(rawPath);
+
+    const remove = row.querySelector(".remove-row");
+    if (remove) {
+      remove.classList.add("gallery-image-remove");
+      if (remove.textContent !== "Удалить") remove.textContent = "Удалить";
+      remove.title = "Удалить изображение из галереи";
+      remove.setAttribute("aria-label", "Удалить изображение из галереи");
+    }
+
+    if (!path) {
+      row.classList.remove("gallery-card");
+      input.classList.remove("gallery-path-input");
+      row.querySelector(".gallery-card-preview")?.remove();
+      row.querySelector(".gallery-card-info")?.remove();
+      row.querySelector(".gallery-card-controls")?.remove();
+      return;
+    }
+
+    row.classList.add("gallery-card");
+    input.classList.add("gallery-path-input");
+
+    let preview = row.querySelector(".gallery-card-preview");
+    if (!preview) {
+      preview = document.createElement("div");
+      preview.className = "gallery-card-preview";
+      const img = document.createElement("img");
+      img.alt = "";
+      const fallback = document.createElement("span");
+      fallback.textContent = "Нет предпросмотра";
+      img.addEventListener("error", () => {
+        img.style.display = "none";
+        fallback.style.display = "block";
+      });
+      img.addEventListener("load", () => {
+        img.style.display = "block";
+        fallback.style.display = "none";
+      });
+      preview.append(img, fallback);
+      row.insertBefore(preview, input);
+    }
+    const img = preview.querySelector("img");
+    const wantedSrc = imageUrl(rawPath);
+    if (img && img.getAttribute("src") !== wantedSrc) img.src = wantedSrc;
+
+    let info = row.querySelector(".gallery-card-info");
+    if (!info) {
+      info = document.createElement("div");
+      info.className = "gallery-card-info";
+      const title = document.createElement("strong");
+      const code = document.createElement("code");
+      info.append(title, code);
+      input.insertAdjacentElement("afterend", info);
+    }
+    const title = info.querySelector("strong");
+    const code = info.querySelector("code");
+    if (title) title.textContent = `Изображение ${index + 1}`;
+    if (code) {
+      code.textContent = rawPath;
+      code.title = rawPath;
+    }
+
+    let controls = row.querySelector(".gallery-card-controls");
+    if (!controls) {
+      controls = document.createElement("div");
+      controls.className = "gallery-card-controls";
+
+      const up = document.createElement("button");
+      up.type = "button";
+      up.className = "btn btn-small btn-secondary gallery-order-btn gallery-move-up";
+      up.textContent = "↑";
+      up.title = "Переместить выше";
+      up.setAttribute("aria-label", "Переместить изображение выше");
+
+      const down = document.createElement("button");
+      down.type = "button";
+      down.className = "btn btn-small btn-secondary gallery-order-btn gallery-move-down";
+      down.textContent = "↓";
+      down.title = "Переместить ниже";
+      down.setAttribute("aria-label", "Переместить изображение ниже");
+
+      controls.append(up, down);
+      if (remove) controls.appendChild(remove);
+      row.appendChild(controls);
+    } else if (remove && remove.parentElement !== controls) {
+      controls.appendChild(remove);
+    }
+
+    const up = controls.querySelector(".gallery-move-up");
+    const down = controls.querySelector(".gallery-move-down");
+    if (up) up.disabled = index === 0;
+    if (down) down.disabled = index === total - 1;
+  }
+
+  function refreshGalleryCards() {
+    const list = document.querySelector("#gallery-editor");
+    if (!list) return;
+    const rows = [...list.querySelectorAll(":scope > .repeat-item")];
+    list.classList.toggle("gallery-cards", rows.some((row) => normalizePath(row.querySelector(".repeat-value")?.value)));
+    rows.forEach((row, index) => ensureGalleryCard(row, index, rows.length));
   }
 
   function ensureRemovalUi() {
     ensureRemovalStyles();
     syncCoverRemoveButton();
-    upgradeGalleryRemoveButtons();
+    refreshGalleryCards();
   }
 
   window.fetch = async function bibikaFetch(input, init = {}) {
@@ -148,6 +266,30 @@
     const target = event.target;
     if (!(target instanceof Element)) return;
 
+    const moveUp = target.closest("#gallery-editor .gallery-move-up");
+    if (moveUp) {
+      const row = moveUp.closest(".repeat-item");
+      const previous = row?.previousElementSibling;
+      if (row && previous) {
+        row.parentElement.insertBefore(row, previous);
+        refreshGalleryCards();
+        showToast("Порядок галереи изменён. Он применится после сохранения продукта.");
+      }
+      return;
+    }
+
+    const moveDown = target.closest("#gallery-editor .gallery-move-down");
+    if (moveDown) {
+      const row = moveDown.closest(".repeat-item");
+      const next = row?.nextElementSibling;
+      if (row && next) {
+        row.parentElement.insertBefore(next, row);
+        refreshGalleryCards();
+        showToast("Порядок галереи изменён. Он применится после сохранения продукта.");
+      }
+      return;
+    }
+
     const removeCover = target.closest("#remove-cover-image");
     if (removeCover) {
       const cover = document.querySelector("#f-cover");
@@ -163,7 +305,7 @@
     if (galleryRemove) {
       setTimeout(() => {
         showToast("Изображение убрано из галереи. Изменение применится после сохранения продукта.", 4600);
-        upgradeGalleryRemoveButtons();
+        refreshGalleryCards();
       }, 0);
       return;
     }
@@ -179,6 +321,7 @@
 
   document.addEventListener("input", (event) => {
     if (event.target?.id === "f-cover") syncCoverRemoveButton();
+    if (event.target?.closest?.("#gallery-editor")) refreshGalleryCards();
   });
 
   document.addEventListener("keydown", (event) => {
