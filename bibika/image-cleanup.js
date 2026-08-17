@@ -1,7 +1,7 @@
 (() => {
   const pending = new Set();
   const nativeFetch = window.fetch.bind(window);
-  const LIVE_SITE_URL = "https://kiananstudio.com";
+  const LIVE_SITE_URL = "https://raw.githubusercontent.com/kiananstudio/kiananstudio.github.io/main";
   let observer = null;
   let observerScheduled = false;
   let uiRefreshRunning = false;
